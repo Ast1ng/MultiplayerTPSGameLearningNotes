@@ -24,4 +24,7 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "武器属性")
 	class UParticleSystem* ImpactParticles; //命中粒子效果
+
+	UPROPERTY(EditAnywhere, Category = "武器属性")
+	UParticleSystem* BeamParticles; //光束粒子效果
 };
