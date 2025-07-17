@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "HitScanWeapon.h"
@@ -12,7 +12,7 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 	Super::Fire(HitTarget);
 	
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
-	if (OwnerPawn == nullptr) return; //Èç¹ûÃ»ÓĞÓµÓĞÕß£¬Ôò·µ»Ø
+	if (OwnerPawn == nullptr) return; //å¦‚æœæ²¡æœ‰æ‹¥æœ‰è€…ï¼Œåˆ™è¿”å›
 	AController* InstigatorController = OwnerPawn->GetController();
 
 	const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName(FName("MuzzleFlash"));
@@ -34,35 +34,35 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 				ECollisionChannel::ECC_Visibility
 			);
 
-			FVector BeamEnd = End;	//¹âÊøÖÕµã, ¼´±ãÎ´ÃüÖĞÈÎºÎ¶«Î÷Ò²±£Ö¤ÓĞ¹âÊøÁ£×ÓÉú³É
+			FVector BeamEnd = End;	//å…‰æŸç»ˆç‚¹, å³ä¾¿æœªå‘½ä¸­ä»»ä½•ä¸œè¥¿ä¹Ÿä¿è¯æœ‰å…‰æŸç²’å­ç”Ÿæˆ
 
 
-			if (FireHit.bBlockingHit)	//Ôì³ÉÉËº¦
+			if (FireHit.bBlockingHit)	//é€ æˆä¼¤å®³
 			{
-				BeamEnd = FireHit.ImpactPoint;	//Èç¹ûÓĞÃüÖĞ£¬Ôò½«¹âÊøÖÕµãÉèÖÃÎªÃüÖĞÎ»ÖÃ
+				BeamEnd = FireHit.ImpactPoint;	//å¦‚æœæœ‰å‘½ä¸­ï¼Œåˆ™å°†å…‰æŸç»ˆç‚¹è®¾ç½®ä¸ºå‘½ä¸­ä½ç½®
 				APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(FireHit.GetActor());
 				if (PlayerCharacter && HasAuthority() && InstigatorController)
 				{
 					
 						UGameplayStatics::ApplyDamage(
-						PlayerCharacter,				// ÊÜÉËµÄ½ÇÉ«
-						Damage,						// ÉËº¦Öµ
-						InstigatorController,	// Ôì³ÉÉËº¦µÄ¿ØÖÆÆ÷
-						this,						// Ôì³ÉÉËº¦µÄÎäÆ÷
-						UDamageType::StaticClass()	// Ê¹ÓÃÄ¬ÈÏµÄÉËº¦ÀàĞÍ
+						PlayerCharacter,				// å—ä¼¤çš„è§’è‰²
+						Damage,						// ä¼¤å®³å€¼
+						InstigatorController,	// é€ æˆä¼¤å®³çš„æ§åˆ¶å™¨
+						this,						// é€ æˆä¼¤å®³çš„æ­¦å™¨
+						UDamageType::StaticClass()	// ä½¿ç”¨é»˜è®¤çš„ä¼¤å®³ç±»å‹
 					);
 					
 					
 				}
-				if (ImpactParticles)	//Éú³ÉÃüÖĞÁ£×ÓĞ§¹û
+				if (ImpactParticles)	//ç”Ÿæˆå‘½ä¸­ç²’å­æ•ˆæœ
 				{
 					UGameplayStatics::SpawnEmitterAtLocation(
 						World,
 						ImpactParticles,
-						FireHit.ImpactPoint,	//ÃüÖĞÎ»ÖÃ
-						FireHit.ImpactNormal.Rotation(),	//ÃüÖĞ·¨ÏßµÄĞı×ª
-						FVector(1.f),			//Ëõ·Å
-						true					//ÊÇ·ñ×Ô¶¯Ïú»Ù
+						FireHit.ImpactPoint,	//å‘½ä¸­ä½ç½®
+						FireHit.ImpactNormal.Rotation(),	//å‘½ä¸­æ³•çº¿çš„æ—‹è½¬
+						FVector(1.f),			//ç¼©æ”¾
+						true					//æ˜¯å¦è‡ªåŠ¨é”€æ¯
 					);
 				}
 				if (BeamParticles)
