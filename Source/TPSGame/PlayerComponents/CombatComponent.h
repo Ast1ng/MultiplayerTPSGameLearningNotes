@@ -9,8 +9,7 @@
 #include "TPSGame/PlayerTypes/CombatState.h"
 #include "CombatComponent.generated.h"
 
-//准星方向的射线
-#define TRACE_LENGTH 80000.f
+
 
 class AWeapon;
 
@@ -188,7 +187,11 @@ private:
 
 	//初始手枪备弹
 	UPROPERTY(EditAnywhere, category = "初始备弹")
-	int32 StartingSMGlAmmo = 30;
+	int32 StartingSMGAmmo = 30;
+
+	//初始霰弹枪备弹
+	UPROPERTY(EditAnywhere, category = "初始备弹")
+	int32 StartingShotgunAmmo = 10;
 
 	//初始化携带的备弹量
 	void InitializeCarrieddAmmo();

@@ -37,7 +37,7 @@ public:
 	void StartSession();
 
 	//
-	//用于菜单类绑定的自定义委托的回调函数
+	//	用于菜单类绑定的自定义委托的回调函数
 	//
 
 	FMultiplayerOnCreateSessionComplete MultiplayerOnCreateSessionComplete; //创建会话完成
@@ -48,8 +48,8 @@ public:
 
 protected:
 	//
-	//用于委托的内部回调函数，将加入到在线回话接口委托列表
-	//这些不需要在类外被调用
+	//	用于委托的内部回调函数，将加入到在线回话接口委托列表
+	//	这些不需要在类外被调用
 	//
 
 	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);	//创建会话完成的回调函数
@@ -64,8 +64,8 @@ private:
 	TSharedPtr<FOnlineSessionSearch> LastSessionSearch;		//上次查找的会话搜索结果
 
 	//
-	// 用于加入到在线会话接口列表
-	//在OnlineSessionSubsystem内部绑定这些回调函数
+	//	用于加入到在线会话接口列表
+	//	在OnlineSessionSubsystem内部绑定这些回调函数
 	//
 	FOnCreateSessionCompleteDelegate CreateSessionCompleteDelegate;
 	FDelegateHandle CreateSessionCompleteDelegateHandle;
