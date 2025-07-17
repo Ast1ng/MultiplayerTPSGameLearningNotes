@@ -6,6 +6,7 @@
 #include "TPSGame/Character/PlayerCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Sound/SoundCue.h"
 
 void AHitScanWeapon::Fire(const FVector& HitTarget)
 {
@@ -65,6 +66,14 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 						true					//是否自动销毁
 					);
 				}
+				if (HitSound) //只有在没有命中粒子特效来播放命中音效的时候才需要的命中音效
+				{
+					UGameplayStatics::PlaySoundAtLocation(
+						World,
+						HitSound,
+						FireHit.ImpactPoint	//命中位置
+					);
+				}
 				if (BeamParticles)
 				{
 					UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(
@@ -79,10 +88,22 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 				}
 			}
 		}
-	}
-	
-	
+		if (MuzzleFlash)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(
+				World,
+				MuzzleFlash,
+				SocketTransform	//枪口火焰位置
+			);
+		}
 
-	
-		
+		if (FireSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(
+				World,
+				FireSound,					//开火音效
+				GetActorLocation()			//音效产生位置
+			);
+		}
+	}	
 }

@@ -161,6 +161,10 @@ private:
 	//可以开火（弹夹弹药量不为空，且处于可以开火的状态）
 	bool CanFire();
 
+	/*
+	*	———————— 武器弹药 ————————
+	*/
+
 	//携带的当前装备的武器类型的备弹量
 	UPROPERTY(ReplicatedUsing = OnRep_CarriedAmmo)
 	int32 CarriedAmmo;
@@ -181,6 +185,10 @@ private:
 	//初始手枪备弹
 	UPROPERTY(EditAnywhere, category = "初始备弹")
 	int32 StartingPistolAmmo = 24;
+
+	//初始手枪备弹
+	UPROPERTY(EditAnywhere, category = "初始备弹")
+	int32 StartingSMGlAmmo = 30;
 
 	//初始化携带的备弹量
 	void InitializeCarrieddAmmo();

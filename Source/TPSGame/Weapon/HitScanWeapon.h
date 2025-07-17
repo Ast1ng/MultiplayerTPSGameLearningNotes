@@ -20,11 +20,20 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere, Category = "武器属性")
-	float Damage = 45.f; //伤害值
+	float Damage = 45.f;					//伤害值
 
 	UPROPERTY(EditAnywhere, Category = "武器属性")
 	class UParticleSystem* ImpactParticles; //命中粒子效果
 
 	UPROPERTY(EditAnywhere, Category = "武器属性")
-	UParticleSystem* BeamParticles; //光束粒子效果
+	UParticleSystem* BeamParticles;			//光束粒子效果
+
+	UPROPERTY(EditAnywhere, Category = "武器属性")
+	UParticleSystem* MuzzleFlash;			//枪口火焰粒子效果
+
+	UPROPERTY(EditAnywhere, Category = "武器属性")
+	USoundCue* FireSound;					//开火音效
+
+	UPROPERTY(EditAnywhere, Category = "武器属性")
+	USoundCue* HitSound;					//命中音效
 };
