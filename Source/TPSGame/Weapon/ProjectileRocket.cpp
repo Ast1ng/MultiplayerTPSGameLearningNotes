@@ -3,7 +3,6 @@
 
 #include "ProjectileRocket.h"
 #include "Kismet/GameplayStatics.h"
-#include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 #include "Components/BoxComponent.h"
 #include "Sound/SoundCue.h"
@@ -12,9 +11,9 @@
 
 AProjectileRocket::AProjectileRocket()
 {
-	RocketMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("火箭弹模型"));
-	RocketMesh->SetupAttachment(RootComponent);
-	RocketMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision); // 火箭弹模型不参与碰撞
+	ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("火箭弹模型"));
+	ProjectileMesh->SetupAttachment(RootComponent);
+	ProjectileMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision); // 火箭弹模型不参与碰撞
 
 	RocketMovementComponent = CreateDefaultSubobject<URocketMovementComponent>(TEXT("火箭弹移动组件"));
 	RocketMovementComponent->bRotationFollowsVelocity = true;
@@ -32,19 +31,7 @@ void AProjectileRocket::BeginPlay()
 		CollisionBox->OnComponentHit.AddDynamic(this, &AProjectileRocket::OnHit);
 	}
 
-	// 生成火箭弹尾迹特效
-	if (TrailSystem)
-	{
-		TrailSystemComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
-			TrailSystem,
-			GetRootComponent(),
-			FName(),
-			GetActorLocation(),
-			GetActorRotation(),
-			EAttachLocation::KeepWorldPosition,
-			false
-		);
-	}
+	SpawnTrailSystem();
 
 	if (ProjectileLoop && LoopingSoundAttenuation)
 	{
@@ -66,47 +53,18 @@ void AProjectileRocket::BeginPlay()
 
 }
 
-void AProjectileRocket::DestoryTimerFinished()
-{
-	Destroy();
-}
+
 
 void AProjectileRocket::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	if (OtherActor == GetOwner())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("命中自身！")); 
+		//UE_LOG(LogTemp, Warning, TEXT("命中自身！")); 
 		return;
 	}
-	//火箭弹发射人
-	APawn* FiringPawn = GetInstigator();
+	ExplodeDamage(); // 造成爆炸伤害
 
-	if (FiringPawn && HasAuthority())
-	{
-		AController* FiringController = FiringPawn->GetController();
-		if (FiringController)
-		{
-			UGameplayStatics::ApplyRadialDamageWithFalloff(
-				this,
-				Damage, // 最大伤害
-				10.f,	// 最小伤害
-				GetActorLocation(), // 爆炸中心位置
-				InnerRadius, // 爆炸内半径
-				OuterRadius, // 爆炸外半径
-				1.f,
-				UDamageType::StaticClass(), // 伤害类型
-				TArray<AActor*>(),			//忽略的目标列表
-				this	// 造成伤害的Actor
-			);
-		}
-	}
-
-	GetWorldTimerManager().SetTimer(
-		DestroyTimer,
-		this,
-		&AProjectileRocket::DestoryTimerFinished,
-		DestoryTime
-	);
+	StartDestoryTimer();
 
 	if (ImpactParticles)
 	{
@@ -116,9 +74,9 @@ void AProjectileRocket::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());	// 播放碰撞音效
 	}
-	if (RocketMesh)
+	if (ProjectileMesh)
 	{
-		RocketMesh->SetVisibility(false); // 隐藏火箭弹模型
+		ProjectileMesh->SetVisibility(false); // 隐藏火箭弹模型
 	}
 	if (CollisionBox)
 	{

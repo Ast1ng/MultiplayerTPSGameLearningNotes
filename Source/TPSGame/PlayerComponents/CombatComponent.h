@@ -193,6 +193,13 @@ private:
 	UPROPERTY(EditAnywhere, category = "初始备弹")
 	int32 StartingShotgunAmmo = 10;
 
+	//初始霰弹枪备弹
+	UPROPERTY(EditAnywhere, category = "初始备弹")
+	int32 StartingSniperAmmo = 12;
+
+	UPROPERTY(EditAnywhere, category = "初始备弹")
+	int32 StartingGrenadeLauncherAmmo = 10;
+
 	//初始化携带的备弹量
 	void InitializeCarrieddAmmo();
 

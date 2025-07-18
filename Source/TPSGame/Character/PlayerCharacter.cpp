@@ -184,6 +184,11 @@ void APlayerCharacter::MulticastElim_Implementation()
 			GetActorLocation()
 		);
 	}
+	bool bHideSniperScore = IsLocallyControlled() && Combat && Combat->EquippedWeapon && Combat->bAiming && Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
+	if (bHideSniperScore)
+	{
+		ShowSniperScopeWidget(false);
+	}
 }
 
 void APlayerCharacter::ElimTimerFinished()
@@ -371,6 +376,12 @@ void APlayerCharacter::PlayReloadMontage()
 			SectionName = FName("Rifle");
 			break;
 		case EWeaponType::EWT_Shotgun:
+			SectionName = FName("Rifle");
+			break;
+		case EWeaponType::EWT_SniperRifle:
+			SectionName = FName("Rifle");
+			break;
+		case EWeaponType::EWT_GrenadeLauncher:
 			SectionName = FName("Rifle");
 			break;
 		}

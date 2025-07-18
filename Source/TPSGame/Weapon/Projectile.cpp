@@ -9,6 +9,8 @@
 #include "Sound/SoundCue.h"
 #include "TPSGame/Character/PlayerCharacter.h"
 #include "TPSGame/TPSGame.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 AProjectile::AProjectile()
 {
@@ -48,15 +50,75 @@ void AProjectile::BeginPlay()
 	}
 }
 
+
+
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	Destroy();
+}
+
+void AProjectile::SpawnTrailSystem()
+{
+	// 生成射弹尾迹特效
+	if (TrailSystem)
+	{
+		TrailSystemComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			TrailSystem,
+			GetRootComponent(),
+			FName(),
+			GetActorLocation(),
+			GetActorRotation(),
+			EAttachLocation::KeepWorldPosition,
+			false
+		);
+	}
+}
+
+void AProjectile::ExplodeDamage()
+{
+	//火箭弹发射人
+	APawn* FiringPawn = GetInstigator();
+
+	if (FiringPawn && HasAuthority())
+	{
+		AController* FiringController = FiringPawn->GetController();
+		if (FiringController)
+		{
+			UGameplayStatics::ApplyRadialDamageWithFalloff(
+				this,
+				Damage, // 最大伤害
+				10.f,	// 最小伤害
+				GetActorLocation(), // 爆炸中心位置
+				InnerRadius, // 爆炸内半径
+				OuterRadius, // 爆炸外半径
+				1.f,
+				UDamageType::StaticClass(), // 伤害类型
+				TArray<AActor*>(),			//忽略的目标列表
+				this	// 造成伤害的Actor
+			);
+		}
+	}
 }
 
 void AProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void AProjectile::StartDestoryTimer()
+{
+	GetWorldTimerManager().SetTimer(
+		DestroyTimer,
+		this,
+		&AProjectile::DestoryTimerFinished,
+		DestoryTime
+	);
+}
+
+void AProjectile::DestoryTimerFinished()
+{
+	Destroy();
 }
 
 void AProjectile::Destroyed()
