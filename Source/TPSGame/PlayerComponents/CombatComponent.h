@@ -38,6 +38,14 @@ public:
 	//按下开火时
 	void FireButtonPressed(bool bPressed);
 
+	//霰弹枪逐个换弹
+	UFUNCTION(BlueprintCallable)
+	void ShotgunShellReload();
+	
+	//将霰弹枪换弹结束同步到客户端
+	UFUNCTION()
+	void JumpToShotgunEnd();
+
 protected:
 	virtual void BeginPlay() override;
 	//设置瞄准状态
@@ -210,7 +218,10 @@ private:
 	UFUNCTION()
 	void OnRep_CombatState();
 
+	//处理换弹
 	void UpdateAmmoValues();
+	//更新霰弹枪的弹药值
+	void UpdateShotgunAmmoValues();
 public:	
 	
 
