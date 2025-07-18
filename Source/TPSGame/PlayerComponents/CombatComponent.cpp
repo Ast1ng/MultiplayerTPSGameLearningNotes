@@ -191,6 +191,7 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 
 void UCombatComponent::Reload()
 {
+	if (Character == nullptr || EquippedWeapon == nullptr) return;
 	if (EquippedWeapon->GetAmmo() == EquippedWeapon->GetMagCapacity()) return;	//如果弹匣已满则不进行换弹
 	if (CarriedAmmo > 0 && CombatState != ECombatState::ECS_Reloading)
 	{

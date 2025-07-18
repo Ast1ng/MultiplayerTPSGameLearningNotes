@@ -23,7 +23,7 @@ void AProjectileGrenade::BeginPlay()
 	AActor::BeginPlay();
 
 	StartDestoryTimer();		//开始延迟销毁尾迹计时器
-	SpawnTrailSystem();
+	SpawnTrailSystem();			// 生成射弹尾迹特效	
 
 	ProjectileMovementComponent->OnProjectileBounce.AddDynamic(this, &AProjectileGrenade::OnBounce); // 绑定弹跳事件
 }
