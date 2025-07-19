@@ -118,6 +118,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UCombatComponent* Combat;	
 
+	//Buff组件
+	UPROPERTY(VisibleAnywhere)
+	class UBuffComponent* Buff;
+
 	//服务端调用的拾取武器按钮触发时的事件
 	UFUNCTION(Server, Reliable)
 	void ServerEquipButtonPressed();	

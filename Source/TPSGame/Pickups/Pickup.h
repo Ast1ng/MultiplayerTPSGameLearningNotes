@@ -39,6 +39,10 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "音效")
 	class USoundCue* PickupSound;
+
+	FTimerHandle BindOverlapTimer; // 绑定重叠时间定时器句柄
+	float BindOverlapTime = 0.25f; // 绑定重叠事件的时间间隔
+	void BindOverlapTimerFinished(); // 绑定重叠事件定时器回调函数
 public:	
 	
 

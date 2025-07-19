@@ -9,6 +9,7 @@
 #include "Net/UnrealNetwork.h"
 #include "TPSGame/Weapon/Weapon.h"
 #include "TPSGame/PlayerComponents/CombatComponent.h"
+#include "TPSGame/PlayerComponents/BuffComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "PlayerAnimInstance.h"
@@ -48,6 +49,9 @@ APlayerCharacter::APlayerCharacter()
 
 	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));			//创建战斗组件
 	Combat->SetIsReplicated(true);
+
+	Buff = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));			//创建Buff组件
+	Buff->SetIsReplicated(true);
 
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;//启用蹲伏
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
@@ -326,13 +330,17 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &APlayerCharacter::ReloadButtonPressed);	//按下换弹
 }
 
-//初始化后的组件
+//后初始化组件
 void APlayerCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 	if (Combat)
 	{
 		Combat->Character = this;
+	}
+	if (Buff)
+	{
+		Buff->Character = this;
 	}
 }
 
