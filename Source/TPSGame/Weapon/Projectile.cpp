@@ -94,7 +94,8 @@ void AProjectile::ExplodeDamage()
 				1.f,
 				UDamageType::StaticClass(), // 伤害类型
 				TArray<AActor*>(),			//忽略的目标列表
-				this	// 造成伤害的Actor
+				this,	// 造成伤害的Actor
+				FiringPawn->GetInstigatorController() // 造成伤害的控制器
 			);
 		}
 	}

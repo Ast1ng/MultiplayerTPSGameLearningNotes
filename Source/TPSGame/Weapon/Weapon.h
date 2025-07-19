@@ -94,6 +94,12 @@ public:
 	// ---------------------------
 
 
+	/**
+	*	------- 开关渲染自定义深度通道 -------
+	**/
+
+	void EnableCustomDepth(bool bEnable);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

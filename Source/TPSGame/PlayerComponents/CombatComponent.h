@@ -46,6 +46,9 @@ public:
 	UFUNCTION()
 	void JumpToShotgunEnd();
 
+	//拾取弹药
+	void PickupAmmo(EWeaponType WeaponType, int32 AmmoAmount);
+
 protected:
 	virtual void BeginPlay() override;
 	//设置瞄准状态
@@ -181,6 +184,9 @@ private:
 
 	TMap<EWeaponType, int32> CarriedAmmoMap;
 
+	UPROPERTY(EditAnywhere, Category = "最大备弹")
+	int32 MaxCarriedAmmo = 200;	//最大备弹量
+
 	//初始突击步枪备弹
 	UPROPERTY(EditAnywhere, category = "初始备弹")
 	int32 StartingARAmmo = 30;
@@ -210,6 +216,9 @@ private:
 
 	//初始化携带的备弹量
 	void InitializeCarrieddAmmo();
+
+	//更新携带弹药量并同步到HUD
+	void UpdateCarriedAmmo();	
 
 	//战斗状态
 	UPROPERTY(ReplicatedUsing = OnRep_CombatState)

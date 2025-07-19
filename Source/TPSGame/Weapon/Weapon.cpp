@@ -29,6 +29,9 @@ AWeapon::AWeapon()
 	WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);	//忽略Pawn类的碰撞
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);										//关闭碰撞行为
 	
+	WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_PURPLE);
+	WeaponMesh->MarkRenderStateDirty();			//标记渲染状态为脏，以便在下次渲染时强制更新自定义深度
+	EnableCustomDepth(true);
 
 	AreaSphere = CreateDefaultSubobject<USphereComponent>(TEXT("球形范围"));									//初始化球形范围检测网格体
 	AreaSphere->SetupAttachment(RootComponent);																//附加到根组件
@@ -39,6 +42,14 @@ AWeapon::AWeapon()
 	PickupWidget->SetupAttachment(RootComponent);
 
 
+}
+
+void AWeapon::EnableCustomDepth(bool bEnable)
+{
+	if (WeaponMesh)
+	{
+		WeaponMesh->SetRenderCustomDepth(bEnable);
+	}
 }
 
 // Called when the game starts or when spawned
@@ -118,6 +129,7 @@ void AWeapon::OnRep_WeaponState()
 			WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 			WeaponMesh->SetEnableGravity(true);
 			WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+			EnableCustomDepth(false);
 		}
 		break;
 	case EWeaponState::EWS_Dropped:
@@ -127,6 +139,9 @@ void AWeapon::OnRep_WeaponState()
 		WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);							//对所有通道阻挡
 		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);	//忽略Pawn类的碰撞
 		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+		WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_PURPLE);
+		WeaponMesh->MarkRenderStateDirty();			//标记渲染状态为脏，以便在下次渲染时强制更新自定义深度
+		EnableCustomDepth(true);
 		break;
 	}
 }
@@ -201,6 +216,7 @@ void AWeapon::SetWeaponState(EWeaponState State)
 			WeaponMesh->SetEnableGravity(true);
 			WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 		}
+		EnableCustomDepth(false);					//启用自定义深度
 		break;
 	case EWeaponState::EWS_Dropped:
 		if (HasAuthority())
@@ -213,6 +229,9 @@ void AWeapon::SetWeaponState(EWeaponState State)
 		WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);							//对所有通道阻挡
 		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);	//忽略Pawn类的碰撞
 		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+		WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_PURPLE);
+		WeaponMesh->MarkRenderStateDirty();			//标记渲染状态为脏，以便在下次渲染时强制更新自定义深度
+		EnableCustomDepth(true);
 		break;
 	}
 	
