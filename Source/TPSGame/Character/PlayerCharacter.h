@@ -89,6 +89,12 @@ protected:
 	//更新血量显示HUD
 	void UpdateHUDHealth();
 
+	//更新HUD中的弹药量
+	void UpdateHUDAmmo();
+
+	//生成初始武器
+	void SpawnDefaultWeapon();
+
 	//拉取所有相关类并初始化HUD
 	void PollInit();
 
@@ -268,7 +274,7 @@ private:
 	// ------------------------------
 
 	/**
-	*	------- 淘汰机器人 -------
+	*	------- 淘汰粒子效果 -------
 	*/
 
 	//淘汰机器人粒子效果
@@ -284,6 +290,17 @@ private:
 
 	UPROPERTY()
 	class ABlasterPlayerState* BlasterPlayerState;
+
+	// ------------------------------
+
+	/**
+	*	------- 初始武器 -------
+	*/
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AWeapon> DefaultWeaponClass;
+
+
 
 public:
 
