@@ -60,8 +60,8 @@ protected:
 
 private:
 	IOnlineSessionPtr SessionInterface;						//在线会话接口指针
-	TSharedPtr<FOnlineSessionSettings> LastSessionSettings;	//上次创建的会话设置
-	TSharedPtr<FOnlineSessionSearch> LastSessionSearch;		//上次查找的会话搜索结果
+	TSharedPtr<FOnlineSessionSettings> LastSessionSettings;	//最后一次创建的会话设置
+	TSharedPtr<FOnlineSessionSearch> LastSessionSearch;		//最后一次查找的会话搜索结果
 
 	//
 	//	用于加入到在线会话接口列表

@@ -17,7 +17,7 @@ void UMenu::MenuSetup(int32 NumberOfPublicConnections, FString TypeOfMatch, FStr
 	MatchType = TypeOfMatch;
 	AddToViewport();
 	SetVisibility(ESlateVisibility::Visible);
-	bIsFocusable = true;
+	SetFocus();
 
 	UWorld* World = GetWorld();
 
@@ -53,15 +53,18 @@ void UMenu::MenuSetup(int32 NumberOfPublicConnections, FString TypeOfMatch, FStr
 
 bool UMenu::Initialize()
 {
-	if (!Super::Initialize()) {
+	if (!Super::Initialize()) 
+	{
 		return false;
 	}
 
-	if (HostButton) {
+	if (HostButton) 
+	{
 		HostButton->OnClicked.AddDynamic(this, &ThisClass::HostButtonClicked);
 	}
 
-	if (JoinButton) {
+	if (JoinButton) 
+	{
 		JoinButton->OnClicked.AddDynamic(this, &ThisClass::JoinButtonClicked);
 	}
 
@@ -116,10 +119,30 @@ void UMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResu
 
 	for (auto Result : SessionResults)
 	{
-		FString SettingValue;
-		Result.Session.SessionSettings.Get(FName("MatchType"), SettingValue);
-		if (SettingValue == MatchType)
+		FString Id = Result.GetSessionIdStr();
+		FString User = Result.Session.OwningUserName;
+		FString SettingsValue;
+		Result.Session.SessionSettings.Get(FName("MatchType"), SettingsValue);
+		if (GEngine)
 		{
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				15.f,
+				FColor::Cyan,
+				FString::Printf(TEXT("Id: %s, User: %s"), *Id, *User)
+			);
+		}
+		if (SettingsValue == MatchType)
+		{
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(
+					-1,
+					15.f,
+					FColor::Cyan,
+					FString::Printf(TEXT("加入匹配类型: %s"), *MatchType)
+				);
+			}
 			MultiplayerSessionSubsystem->JoinSession(Result);
 			return;
 		}
@@ -148,7 +171,30 @@ void UMenu::OnJoinSession(EOnJoinSessionCompleteResult::Type Result)
 		if (SessionInterface.IsValid())
 		{
 			FString Address;
-			SessionInterface->GetResolvedConnectString(NAME_GameSession, Address);
+			if (!SessionInterface->GetResolvedConnectString(NAME_GameSession, Address))
+			{
+				if (GEngine)
+				{
+					GEngine->AddOnScreenDebugMessage(
+						-1,
+						15.f,
+						FColor::Red,
+						FString::Printf(TEXT("加入会话失败，连接错误！"))
+					);
+				}
+				return;
+			}
+
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(
+					-1,
+					15.f,
+					FColor::Yellow,
+					FString::Printf(TEXT("已连接到: %s"), *Address)
+				);
+			}
+
 
 			APlayerController* PlayerController = GetGameInstance()->GetFirstLocalPlayerController();
 			if (PlayerController)
