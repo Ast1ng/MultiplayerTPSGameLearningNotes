@@ -14,13 +14,15 @@ UMultiplayerSessionSubsystem::UMultiplayerSessionSubsystem() :
 {
 	
 	IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
-	if (Subsystem) {
+	if (Subsystem) 
+	{
 		SessionInterface = Subsystem->GetSessionInterface();
 	}
 }
 
 void UMultiplayerSessionSubsystem::CreateSession(int32 NumPublicConnections, FString MatchType)
 {
+
 	if (!SessionInterface.IsValid())
 	{
 		return;
@@ -47,7 +49,6 @@ void UMultiplayerSessionSubsystem::CreateSession(int32 NumPublicConnections, FSt
 	LastSessionSettings->bShouldAdvertise = true;
 	LastSessionSettings->bUsesPresence = true;
 	LastSessionSettings->Set(FName("MatchType"), MatchType, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
-	LastSessionSettings->bUseLobbiesIfAvailable = true;
 	LastSessionSettings->BuildUniqueId = 1;
 	LastSessionSettings->bUseLobbiesIfAvailable = true;
 
@@ -59,14 +60,12 @@ void UMultiplayerSessionSubsystem::CreateSession(int32 NumPublicConnections, FSt
 		//广播自定义委托
 		MultiplayerOnCreateSessionComplete.Broadcast(false);
 	}
-
-	
-
 }
 
-void UMultiplayerSessionSubsystem::FindSession(int32 MaxSearchResults)
+void UMultiplayerSessionSubsystem::FindSessions(int32 MaxSearchResults)
 {
-	if (!SessionInterface.IsValid()) {
+	if (!SessionInterface.IsValid()) 
+	{
 		return;
 	}
 	FindSessionsCompleteDelegateHandle = SessionInterface->AddOnFindSessionsCompleteDelegate_Handle(FindSessionsCompleteDelegate);
@@ -97,6 +96,8 @@ void UMultiplayerSessionSubsystem::JoinSession(const FOnlineSessionSearchResult&
 	JoinSessionCompleteDelegateHandle = SessionInterface->AddOnJoinSessionCompleteDelegate_Handle(JoinSessionCompleteDelegate);
 
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
+
+	//如果加入会话失败
 	if (!SessionInterface->JoinSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, SessionResult))
 	{
 		SessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(JoinSessionCompleteDelegateHandle);
@@ -145,6 +146,7 @@ void UMultiplayerSessionSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
 	if (LastSessionSearch->SearchResults.Num() <= 0)
 	{
 		MultiplayerOnFindSessionsComplete.Broadcast(TArray<FOnlineSessionSearchResult>(), false);
+		return;
 	}
 
 	MultiplayerOnFindSessionsComplete.Broadcast(LastSessionSearch->SearchResults, bWasSuccessful);
