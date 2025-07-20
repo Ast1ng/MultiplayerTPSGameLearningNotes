@@ -66,6 +66,15 @@ void UMultiplayerSessionSubsystem::FindSessions(int32 MaxSearchResults)
 {
 	if (!SessionInterface.IsValid())
 	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				15.f,
+				FColor::Red,
+				FString::Printf(TEXT("sessionInterface is null"))
+			);
+		}
 		return;
 	}
 

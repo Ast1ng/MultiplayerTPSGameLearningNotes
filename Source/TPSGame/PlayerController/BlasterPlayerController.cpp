@@ -24,6 +24,7 @@ void ABlasterPlayerController::BeginPlay()
 
 	PlayerHUD = Cast<APlayerHUD>(GetHUD());
 	ServerCheckMatchState(); //检查比赛状态
+
 }
 
 void ABlasterPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

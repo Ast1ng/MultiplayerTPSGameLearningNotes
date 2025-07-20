@@ -238,7 +238,7 @@ private:
 	int32 StartingGrenadeLauncherAmmo = 10;
 
 	//初始化携带的备弹量
-	void InitializeCarrieddAmmo();
+	void InitializeCarriedAmmo();
 
 	//更新携带弹药量并同步到HUD
 	void UpdateCarriedAmmo();	
@@ -250,7 +250,7 @@ private:
 	UFUNCTION()
 	void OnRep_CombatState();
 
-	//处理换弹
+	//更新弹药值
 	void UpdateAmmoValues();
 	//更新霰弹枪的弹药值
 	void UpdateShotgunAmmoValues();

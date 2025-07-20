@@ -89,12 +89,6 @@ void APlayerCharacter::Elim()
 {
 	DropOrDestroyWeapons();
 	MulticastElim();
-	GetWorldTimerManager().SetTimer(
-		ElimTimer,
-		this,
-		&APlayerCharacter::ElimTimerFinished,
-		ElimDelay
-	);
 }
 
 void APlayerCharacter::MulticastElim_Implementation()
@@ -190,6 +184,13 @@ void APlayerCharacter::MulticastElim_Implementation()
 	{
 		ShowSniperScopeWidget(false);
 	}
+
+	GetWorldTimerManager().SetTimer(
+		ElimTimer,
+		this,
+		&APlayerCharacter::ElimTimerFinished,
+		ElimDelay
+	);
 }
 
 void APlayerCharacter::ElimTimerFinished()
@@ -285,7 +286,6 @@ void APlayerCharacter::Destroyed()
 	}
 }
 
-// BeginPlay
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -293,15 +293,14 @@ void APlayerCharacter::BeginPlay()
 	UpdateHUDHealth();
 	SpawnDefaultWeapon();
 	UpdateHUDAmmo();
-	UpdateHUDHealth();
 	if (HasAuthority())
 	{
 		OnTakeAnyDamage.AddDynamic(this, &APlayerCharacter::ReceiveDamage);
 	}
+	//BlasterPlayerController->SetAudioListenerOverride(GetMesh(), FVector(), FRotator()); //设置音频监听器覆盖，确保音频效果正确
 }
 
 
-// 逐帧调用（Tick)
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);

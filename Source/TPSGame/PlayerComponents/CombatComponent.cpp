@@ -50,7 +50,7 @@ void UCombatComponent::BeginPlay()
 	}
 	if (Character->HasAuthority())
 	{
-		InitializeCarrieddAmmo();
+		InitializeCarriedAmmo();
 	}
 }
 
@@ -654,7 +654,7 @@ void UCombatComponent::OnRep_CarriedAmmo()
 	}
 }
 
-void UCombatComponent::InitializeCarrieddAmmo()
+void UCombatComponent::InitializeCarriedAmmo()
 {
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_AssaultRifle, StartingARAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_RocketLauncher, StartingRocketAmmo);
