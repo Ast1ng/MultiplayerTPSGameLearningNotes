@@ -39,7 +39,8 @@ void UMenu::MenuSetup(int32 NumberOfPublicConnections, FString TypeOfMatch, FStr
 		MultiplayerSessionSubsystem = GameInstance->GetSubsystem<UMultiplayerSessionSubsystem>();
 	}
 
-	if (MultiplayerSessionSubsystem) {
+	if (MultiplayerSessionSubsystem) 
+	{
 		MultiplayerSessionSubsystem->MultiplayerOnCreateSessionComplete.AddDynamic(this, &ThisClass::OnCreateSession);
 		MultiplayerSessionSubsystem->MultiplayerOnFindSessionsComplete.AddUObject(this, &ThisClass::OnFindSessions);
 		MultiplayerSessionSubsystem->MultiplayerOnJoinSessionComplete.AddUObject(this, &ThisClass::OnJoinSession);
@@ -141,10 +142,11 @@ void UMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResu
 void UMenu::OnJoinSession(EOnJoinSessionCompleteResult::Type Result)
 {
 	IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
-	if (Subsystem) {
+	if (Subsystem)
+	{
 		IOnlineSessionPtr SessionInterface = Subsystem->GetSessionInterface();
-
-		if (SessionInterface.IsValid()) {
+		if (SessionInterface.IsValid())
+		{
 			FString Address;
 			SessionInterface->GetResolvedConnectString(NAME_GameSession, Address);
 
@@ -153,11 +155,7 @@ void UMenu::OnJoinSession(EOnJoinSessionCompleteResult::Type Result)
 			{
 				PlayerController->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
 			}
-		 }
-	}
-	if (Result != EOnJoinSessionCompleteResult::Success)
-	{
-		JoinButton->SetIsEnabled(true);
+		}
 	}
 }
 
@@ -173,9 +171,9 @@ void UMenu::HostButtonClicked()
 {
 	HostButton->SetIsEnabled(false);
 
-	if (MultiplayerSessionSubsystem) {
+	if (MultiplayerSessionSubsystem) 
+	{
 		MultiplayerSessionSubsystem->CreateSession(NumPublicConnections, MatchType);
-		
 	}
 }
 
@@ -185,7 +183,7 @@ void UMenu::JoinButtonClicked()
 
 	if (MultiplayerSessionSubsystem)
 	{
-		MultiplayerSessionSubsystem->FindSession(10000);
+		MultiplayerSessionSubsystem->FindSessions(10000);
 	}
 }
 
@@ -202,6 +200,5 @@ void UMenu::MenuTearDown()
 			PlayerController->SetInputMode(InputModeData);
 			PlayerController->SetShowMouseCursor(false);
 		}
-
 	}
 }
