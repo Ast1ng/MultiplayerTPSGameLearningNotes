@@ -15,6 +15,7 @@ enum class EWeaponState : uint8	//武器的状态枚举类
 {
 	EWS_Initial	UMETA(DisplayName = "初始状态"),	//初始状态
 	EWS_Equipped UMETA(DisplayName = "已装备"),	//已装备状态
+	EWS_EquippedSecondary UMETA(DisplayName = "已装备副武器"),	//已装备状态
 	EWS_Dropped	UMETA(DisplayName = "掉落状态"),	//掉落状态状态
 
 	EWS_MAX UMETA(DisplayName = "MAX")
@@ -100,11 +101,15 @@ public:
 
 	void EnableCustomDepth(bool bEnable);
 
+	//掉落后自动销毁
 	bool bDestroyWeapon = false;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	
+	virtual void OnWeaponStateSet(); //根据武器状态来触发不同的行为
+	virtual void OnEquipped();		//武器为EWS_Equipped状态时
+	virtual void OnDropped();		//武器为EWS_Dropped状态时
+	virtual void OnEquippedSecondary(); //装备有副武器时
 
 	//重叠时
 	UFUNCTION()

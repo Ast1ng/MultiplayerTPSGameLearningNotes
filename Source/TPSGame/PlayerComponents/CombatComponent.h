@@ -27,7 +27,9 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	//装备武器
-	void EquipWeapon(AWeapon* WeaponToEquip);	
+	void EquipWeapon(AWeapon* WeaponToEquip);
+	//交换主副武器
+	void SwapWeapon();
 	//换弹
 	void Reload();
 
@@ -62,7 +64,9 @@ protected:
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
 
-	
+	//副武器装备时的回调函数
+	UFUNCTION()
+	void OnRep_SecondaryWeapon();
 
 	void Fire();
 	
@@ -87,6 +91,21 @@ protected:
 	//需要装弹的数量
 	int32 AmountToReload();
 
+	//将武器附加到右手
+	void AttachActorToRightHand(AActor* ActorToAttach);
+	//将武器附加到背后
+	void AttachActorToBackpack(AActor* ActorToAttach);
+	//丢弃武器
+	void DropEquippedWeapon();
+	//装备主要武器
+	void EquippedPrimaryWeapon(AWeapon* WeaponToEquip);
+	//装备副武器
+	void EquippedSecondaryWeapon(AWeapon* WeaponToEquip);
+	//播放装备武器的音效
+	void PlayEquipWeaponSound(AWeapon* WeaponToEquip);
+	//装填空的武器
+	void ReloadEmptyWeapon();
+
 private:
 	//存储客户端的玩家
 	UPROPERTY()
@@ -101,6 +120,10 @@ private:
 	//存储需要被装备的武器
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 	AWeapon* EquippedWeapon;	
+
+	//副武器
+	UPROPERTY(ReplicatedUsing = OnRep_SecondaryWeapon)
+	AWeapon* SecondaryWeapon;
 
 	//瞄准状态
 	UPROPERTY(Replicated)
@@ -232,7 +255,7 @@ private:
 	//更新霰弹枪的弹药值
 	void UpdateShotgunAmmoValues();
 public:	
-	
+	bool ShouldSwapWeapons();
 
 		
 };

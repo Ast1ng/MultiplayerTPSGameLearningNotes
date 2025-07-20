@@ -87,18 +87,7 @@ void APlayerCharacter::OnRep_ReplicatedMovement()
 
 void APlayerCharacter::Elim()
 {
-	if (Combat && Combat->EquippedWeapon)
-	{
-		Combat->EquippedWeapon->Dropped();
-		if (Combat->EquippedWeapon->bDestroyWeapon)
-		{
-			Combat->EquippedWeapon->Destroy();
-		}
-		else
-		{
-			Combat->EquippedWeapon->Dropped();
-		}
-	}
+	DropOrDestroyWeapons();
 	MulticastElim();
 	GetWorldTimerManager().SetTimer(
 		ElimTimer,
@@ -213,6 +202,34 @@ void APlayerCharacter::ElimTimerFinished()
 	
 }
 
+void APlayerCharacter::DropOrDestroyWeapon(AWeapon* Weapon)
+{
+	if (Weapon == nullptr) return;
+	if (Weapon->bDestroyWeapon)
+	{
+		Weapon->Destroy();
+	}
+	else
+	{
+		Weapon->Dropped();
+	}
+}
+
+void APlayerCharacter::DropOrDestroyWeapons()
+{
+	if (Combat)
+	{
+		if (Combat->EquippedWeapon)
+		{
+			DropOrDestroyWeapon(Combat->EquippedWeapon);
+		}
+		if (Combat->SecondaryWeapon)
+		{
+			DropOrDestroyWeapon(Combat->SecondaryWeapon);
+		}
+	}
+}
+
 void APlayerCharacter::UpdateDissolveMaterial(float DissolveValue)
 {
 	if (DynamicDissolveMaterialInstance_Skin)
@@ -276,6 +293,7 @@ void APlayerCharacter::BeginPlay()
 	UpdateHUDHealth();
 	SpawnDefaultWeapon();
 	UpdateHUDAmmo();
+	UpdateHUDHealth();
 	if (HasAuthority())
 	{
 		OnTakeAnyDamage.AddDynamic(this, &APlayerCharacter::ReceiveDamage);
@@ -487,15 +505,23 @@ void APlayerCharacter::EquipButtonPressed()	//Ê°È¡ÎäÆ÷
 	if (bDisableGameplay) return;
 	if (Combat)
 	{
-		if (HasAuthority())
+		ServerEquipButtonPressed();
+	}
+}
+
+//£¨RPC)¶à²¥´¥·¢Ê°È¡ÎäÆ÷
+void APlayerCharacter::ServerEquipButtonPressed_Implementation()
+{
+	if (Combat)
+	{
+		if (OverlappingWeapon)
 		{
 			Combat->EquipWeapon(OverlappingWeapon);
 		}
-		else
+		else if (Combat->ShouldSwapWeapons())
 		{
-			ServerEquipButtonPressed();
+			Combat->SwapWeapon();
 		}
-		
 	}
 }
 
@@ -660,16 +686,6 @@ void APlayerCharacter::FireButtonReleased()
 	if (Combat)
 	{
 		Combat->FireButtonPressed(false);
-	}
-}
-
-
-//£¨RPC)·þÎñ¶Ë´¥·¢Ê°È¡ÎäÆ÷
-void APlayerCharacter::ServerEquipButtonPressed_Implementation()
-{
-	if (Combat)
-	{
-		Combat->EquipWeapon(OverlappingWeapon);
 	}
 }
 

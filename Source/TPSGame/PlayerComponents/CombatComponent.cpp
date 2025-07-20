@@ -28,6 +28,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
+	DOREPLIFETIME(UCombatComponent, SecondaryWeapon);
 	DOREPLIFETIME(UCombatComponent, bAiming);
 	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly);
 	DOREPLIFETIME(UCombatComponent, CombatState)
@@ -82,8 +83,6 @@ void UCombatComponent::FireButtonPressed(bool bPressed)//客户端触发会调�
 	}
 	
 }
-
-
 
 //客户端开火，会调用服务端开火
 void UCombatComponent::Fire()
@@ -159,43 +158,117 @@ void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& T
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 {
 	if (Character == nullptr || WeaponToEquip == nullptr) return;
-	if (EquippedWeapon)
-	{
-		EquippedWeapon->Dropped();
-	}
-	EquippedWeapon = WeaponToEquip;	//获取需要装备的武器
-	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);	//装备武器并修改武器的状态为“已装备”
-	const USkeletalMeshSocket* HandSocket =  Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));	//获取手部插槽(RightHandSocket)
-	if (HandSocket)
-	{
-		HandSocket->AttachActor(EquippedWeapon, Character->GetMesh());	//将武器Actor附加到手部插槽上
-	}
-	EquippedWeapon->SetOwner(Character);	//设置被装备的武器的所有权为当前客户端的玩家
-	EquippedWeapon->SetHUDAmmo();
+	if (CombatState != ECombatState::ECS_Unoccupied) return; //如果当前状态不是空闲状态，则不允许装备武器
 
-	if (CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
+	if (EquippedWeapon != nullptr && SecondaryWeapon == nullptr)
 	{
-		CarriedAmmo = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];
+		EquippedSecondaryWeapon(WeaponToEquip);
 	}
-	Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
-	if (Controller)
+	else
 	{
-		Controller->SetHUDCarriedAmmo(CarriedAmmo);
+		EquippedPrimaryWeapon(WeaponToEquip);
 	}
-
-	if (EquippedWeapon->EquipSound)
-	{
-		UGameplayStatics::PlaySoundAtLocation(
-			this,
-			EquippedWeapon->EquipSound,
-			Character->GetActorLocation()
-		);
-	}
+	
 
 	Character->GetCharacterMovement()->bOrientRotationToMovement = false;	// 禁用自动转向移动方向
 	Character->bUseControllerRotationYaw = true;	// 启用控制器控制 Yaw
 	
 	
+}
+
+void UCombatComponent::SwapWeapon()
+{
+	AWeapon* TempWeapon = EquippedWeapon;
+	EquippedWeapon = SecondaryWeapon;
+	SecondaryWeapon = TempWeapon;
+
+	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+	AttachActorToRightHand(EquippedWeapon);
+	EquippedWeapon->SetHUDAmmo();
+	UpdateCarriedAmmo();
+	PlayEquipWeaponSound(EquippedWeapon);
+	ReloadEmptyWeapon();
+
+	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
+	AttachActorToBackpack(SecondaryWeapon);
+}
+
+bool UCombatComponent::ShouldSwapWeapons()
+{
+	return (EquippedWeapon != nullptr && SecondaryWeapon != nullptr);
+}
+
+
+void UCombatComponent::EquippedPrimaryWeapon(AWeapon* WeaponToEquip)
+{
+	if (WeaponToEquip == nullptr) return;
+	DropEquippedWeapon();
+	EquippedWeapon = WeaponToEquip;								//获取需要装备的武器
+	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);	//装备武器并修改武器的状态为“已装备”
+	AttachActorToRightHand(EquippedWeapon);						//将武器附加到右手插槽上
+	EquippedWeapon->SetOwner(Character);						//设置被装备的武器的所有权为当前客户端的玩家
+	EquippedWeapon->SetHUDAmmo();								//设置HUD中的弹药量	
+	UpdateCarriedAmmo();										//更新携带的弹药量并同步到HUD
+	PlayEquipWeaponSound(WeaponToEquip);						//播放装备武器的音效
+	ReloadEmptyWeapon();										//如果当前武器弹夹为空，则进行换弹
+}
+
+void UCombatComponent::EquippedSecondaryWeapon(AWeapon* WeaponToEquip)
+{
+	if (WeaponToEquip == nullptr) return;
+	SecondaryWeapon = WeaponToEquip;
+	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
+	AttachActorToBackpack(WeaponToEquip);
+	PlayEquipWeaponSound(WeaponToEquip);
+	SecondaryWeapon->SetOwner(Character);
+}
+
+void UCombatComponent::AttachActorToRightHand(AActor* ActorToAttach)
+{
+	if (Character == nullptr || Character->GetMesh() == nullptr || ActorToAttach == nullptr) return;
+	const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));	//获取手部插槽(RightHandSocket)
+	if (HandSocket)
+	{
+		HandSocket->AttachActor(EquippedWeapon, Character->GetMesh());	//将武器Actor附加到手部插槽上
+	}
+}
+
+void UCombatComponent::AttachActorToBackpack(AActor* ActorToAttach)
+{
+	if (Character == nullptr || Character->GetMesh() == nullptr || ActorToAttach == nullptr) return;
+	const USkeletalMeshSocket* BackpackSocket = Character->GetMesh()->GetSocketByName(FName("BackpackSocket"));
+	if (BackpackSocket)
+	{
+		BackpackSocket->AttachActor(ActorToAttach, Character->GetMesh());
+	}
+}
+
+void UCombatComponent::DropEquippedWeapon()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->Dropped();
+	}
+}
+
+void UCombatComponent::PlayEquipWeaponSound(AWeapon* WeaponToEquip)
+{
+	if (Character && WeaponToEquip && WeaponToEquip->EquipSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			WeaponToEquip->EquipSound,
+			Character->GetActorLocation()
+		);
+	}
+}
+
+void UCombatComponent::ReloadEmptyWeapon()
+{
+	if (EquippedWeapon && EquippedWeapon->IsEmpty())
+	{
+		Reload();
+	}
 }
 
 void UCombatComponent::Reload()
@@ -344,30 +417,32 @@ int32 UCombatComponent::AmountToReload()
 	return 0;
 }
 
+
 //当检测到装备出现变化时，禁用自动转向移动方向，启用控制器控制 Yaw
 void UCombatComponent::OnRep_EquippedWeapon()
 {
 	if (EquippedWeapon && Character)
 	{
 		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);	//装备武器并修改武器的状态为“已装备”
-		const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));	//获取手部插槽(RightHandSocket)
-		if (HandSocket)
-		{
-			HandSocket->AttachActor(EquippedWeapon, Character->GetMesh());	//将武器Actor附加到手部插槽上
-		}
+		AttachActorToRightHand(EquippedWeapon);
 		Character->GetCharacterMovement()->bOrientRotationToMovement = false;	// 禁用自动转向移动方向
 		Character->bUseControllerRotationYaw = true;	// 启用控制器控制 Yaw
-
-		if (EquippedWeapon->EquipSound)
-		{
-			UGameplayStatics::PlaySoundAtLocation(
-				this,
-				EquippedWeapon->EquipSound,
-				Character->GetActorLocation()
-			);
-		}
+		PlayEquipWeaponSound(EquippedWeapon);
+		EquippedWeapon->EnableCustomDepth(false);
+		EquippedWeapon->SetHUDAmmo();
 	}
 }
+
+void UCombatComponent::OnRep_SecondaryWeapon()
+{
+	if (SecondaryWeapon && Character)
+	{
+		SecondaryWeapon->SetWeaponState(EWeaponState::EWS_Equipped);	//装备武器并修改武器的状态为“已装备”
+		AttachActorToBackpack(SecondaryWeapon);	//将武器附加到背包插槽上
+		PlayEquipWeaponSound(SecondaryWeapon);
+	}
+}
+
 
 //在准星下跟踪
 void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)

@@ -69,7 +69,7 @@ protected:
 	void AimButtonPressed();			//按下瞄准（鼠标右键）	
 	void AimButtonReleased();			//松开瞄准（鼠标右键）
 	void AimOffset(float DeltaTime);	//获取瞄准偏航角（用于瞄准偏移动画）
-	void CalculateAO_Ptich();
+	void CalculateAO_Ptich();			//计算瞄准偏航角（用于瞄准偏移动画）
 
 	// ------------------------------
 
@@ -99,6 +99,9 @@ protected:
 	void PollInit();
 
 	void RotateInPlace(float DeltaTime);	//转身
+
+	void DropOrDestroyWeapon(AWeapon* Weapon); //丢弃或销毁武器
+	void DropOrDestroyWeapons(); //同时丢弃所有武器
 private:
 	//弹簧臂
 	UPROPERTY(EditAnywhere, Category = "Camera")

@@ -73,6 +73,7 @@ void AWeapon::BeginPlay()
 	
 }
 
+
 // Called every frame
 void AWeapon::Tick(float DeltaTime)
 {
@@ -117,33 +118,8 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 
 void AWeapon::OnRep_WeaponState()
 {
-	switch (WeaponState)
-	{
-	case EWeaponState::EWS_Equipped:
-		ShowPickupWidget(false);
-		WeaponMesh->SetSimulatePhysics(false);
-		WeaponMesh->SetEnableGravity(false);
-		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		if (WeaponType == EWeaponType::EWT_SubmachineGun)
-		{
-			WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-			WeaponMesh->SetEnableGravity(true);
-			WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-			EnableCustomDepth(false);
-		}
-		break;
-	case EWeaponState::EWS_Dropped:
-		WeaponMesh->SetSimulatePhysics(true);
-		WeaponMesh->SetEnableGravity(true);
-		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);							//对所有通道阻挡
-		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);	//忽略Pawn类的碰撞
-		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
-		WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_PURPLE);
-		WeaponMesh->MarkRenderStateDirty();			//标记渲染状态为脏，以便在下次渲染时强制更新自定义深度
-		EnableCustomDepth(true);
-		break;
-	}
+	OnWeaponStateSet();
+
 }
 
 void AWeapon::SetHUDAmmo()
@@ -192,7 +168,11 @@ void AWeapon::OnRep_Owner()
 	}
 	else
 	{
-		SetHUDAmmo();
+		BlasterOwnerCharacter = BlasterOwnerCharacter == nullptr ? Cast<APlayerCharacter>(Owner) : BlasterOwnerCharacter;
+		if (BlasterOwnerCharacter && BlasterOwnerCharacter->GetEquippedWeapon() && BlasterOwnerCharacter->GetEquippedWeapon() == this)
+		{
+			SetHUDAmmo();
+		}
 	}
 	
 }
@@ -202,43 +182,81 @@ void AWeapon::OnRep_Owner()
 void AWeapon::SetWeaponState(EWeaponState State)
 {
 	WeaponState = State;
-	switch (WeaponState)
-	{
-	case EWeaponState::EWS_Equipped:
-		ShowPickupWidget(false);
-		AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		WeaponMesh->SetSimulatePhysics(false);
-		WeaponMesh->SetEnableGravity(false);
-		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		if (WeaponType == EWeaponType::EWT_SubmachineGun)
-		{
-			WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-			WeaponMesh->SetEnableGravity(true);
-			WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-		}
-		EnableCustomDepth(false);					//启用自定义深度
-		break;
-	case EWeaponState::EWS_Dropped:
-		if (HasAuthority())
-		{
-			AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-		}
-		WeaponMesh->SetSimulatePhysics(true);
-		WeaponMesh->SetEnableGravity(true);
-		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);							//对所有通道阻挡
-		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);	//忽略Pawn类的碰撞
-		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
-		WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_PURPLE);
-		WeaponMesh->MarkRenderStateDirty();			//标记渲染状态为脏，以便在下次渲染时强制更新自定义深度
-		EnableCustomDepth(true);
-		break;
-	}
+	OnWeaponStateSet();
 	
 }
 
+void AWeapon::OnWeaponStateSet()
+{
+	switch (WeaponState)
+	{
+	case EWeaponState::EWS_Equipped:
+		OnEquipped();
+		break;
+	case EWeaponState::EWS_EquippedSecondary:
+		OnEquippedSecondary();
+		break;
+	case EWeaponState::EWS_Dropped:
+		OnDropped();
+		break;
+	}
+}
+
+void AWeapon::OnEquipped()
+{
+	ShowPickupWidget(false);
+	AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	WeaponMesh->SetSimulatePhysics(false);
+	WeaponMesh->SetEnableGravity(false);
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	if (WeaponType == EWeaponType::EWT_SubmachineGun)
+	{
+		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		WeaponMesh->SetEnableGravity(true);
+		WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	}
+	EnableCustomDepth(false);
+}
 
 
+void AWeapon::OnEquippedSecondary()
+{
+	ShowPickupWidget(false);
+	AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	WeaponMesh->SetSimulatePhysics(false);
+	WeaponMesh->SetEnableGravity(false);
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	if (WeaponType == EWeaponType::EWT_SubmachineGun)
+	{
+		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		WeaponMesh->SetEnableGravity(true);
+		WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	}
+	EnableCustomDepth(true);
+	if (WeaponMesh)
+	{
+		WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_TAN);
+		WeaponMesh->MarkRenderStateDirty();
+	}
+
+}
+
+void AWeapon::OnDropped()
+{
+	if (HasAuthority())
+	{
+		AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
+	WeaponMesh->SetSimulatePhysics(true);
+	WeaponMesh->SetEnableGravity(true);
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);							//对所有通道阻挡
+	WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);	//忽略Pawn类的碰撞
+	WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_PURPLE);
+	WeaponMesh->MarkRenderStateDirty();			//标记渲染状态为脏，以便在下次渲染时强制更新自定义深度
+	EnableCustomDepth(true);
+}
 
 //显示“拾取武器”的UI
 void AWeapon::ShowPickupWidget(bool bShowWidget)
