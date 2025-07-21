@@ -10,7 +10,7 @@ void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 
 	int32 NumberOfPlayers = GameState.Get()->PlayerArray.Num();//获取GameState中的玩家状态数组
 
-	if (NumberOfPlayers == 2)
+	if (NumberOfPlayers == 5)
 	{
 		UWorld* World = GetWorld();
 		if (World)
@@ -19,4 +19,18 @@ void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 			World->ServerTravel(FString("/Game/Maps/BlasterMap?listen"));
 		}
 	}
+}
+
+void ALobbyGameMode::ManualTravelToGame()
+{
+	if (HasAuthority())
+	{
+		UWorld* World = GetWorld();
+		if (World)
+		{
+			bUseSeamlessTravel = true;
+			World->ServerTravel(FString("/Game/Maps/BlasterMap?listen"));
+		}
+	}
+	
 }
